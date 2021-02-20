@@ -1,3 +1,5 @@
+#include "Record.hpp"
+
 typedef struct {
     void *data;
     int page_size;
