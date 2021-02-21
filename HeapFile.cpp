@@ -83,12 +83,13 @@ PageID alloc_page(Heapfile *heapfile) {
         long curr_page_position = 8;
         for(int i = 0; i < PAGES_IN_HEAPFILE; i++){
             char* c = fseekread(f, curr_page_position, 8);
-            bool allZeroes = false;
+            bool allZeroes = true;
             for(int j = 0; j < 8; j++){
-                allZeroes &= (c[j] != '0');
+                allZeroes &= (c[j] != 0);
             }
             if(allZeroes){
                 page_offset = curr_page_position;
+                found_page_location = true;
                 break;
             }
             curr_page_position += 8 + 4;
