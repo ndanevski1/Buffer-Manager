@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#include <cassert>
 
 struct PageHeader {
     void* page_ptr;
@@ -20,6 +21,11 @@ void fseekwrite(FILE *f, long offset, char c){
     char b[1];
     b[0] = c;
     fwrite(b, 1, 1, f);
+}
+
+void fseekwrite_bytes(FILE *f, long offset, char* c, int length) {
+    fseek(f, offset, SEEK_SET);
+    fwrite(c, 1, length, f);
 }
 
 long fscanlong(FILE *f, long offset){
@@ -178,16 +184,39 @@ void read_page(Heapfile *heapfile, PageID pid, Page *page){
     int heaps_to_jump = pid / PAGES_IN_HEAPFILE;
     int page_in_heap_loc = pid % PAGES_IN_HEAPFILE;
 
-    // fseek
+    Heapfile current_heapfile = *heapfile;
+    for(int i = 0; i < heaps_to_jump; i++) {
+        current_heapfile.file_offset = fscanlong(heapfile->file_ptr, current_heapfile.file_offset);
+        assert(current_heapfile.file_offset != 0);
+    }
 
-    // fread
+    long page_offset = current_heapfile.file_offset + (8 + (8+4)*page_in_heap_loc);
+    assert(fscanint(heapfile->file_ptr, page_offset + 8) != -1);
+
+    page->page_size = heapfile->page_size;
+    page->slot_size = ATTRIBUTE_SIZE; 
+    page->data = fseekread(heapfile->file_ptr, page_offset, heapfile->page_size);
 }
 
 /**
  * Write a page from memory to disk
  */
 void write_page(Page *page, Heapfile *heapfile, PageID pid){
+    int heaps_to_jump = pid / PAGES_IN_HEAPFILE;
+    int page_in_heap_loc = pid % PAGES_IN_HEAPFILE;
 
+    Heapfile current_heapfile = *heapfile;
+    for(int i = 0; i < heaps_to_jump; i++) {
+        current_heapfile.file_offset = fscanlong(heapfile->file_ptr, current_heapfile.file_offset);
+        assert(current_heapfile.file_offset != 0);
+    }
+
+    long page_offset = current_heapfile.file_offset + (8 + (8+4)*page_in_heap_loc);
+    assert(fscanint(heapfile->file_ptr, page_offset + 8) != -1);
+
+    fseekwrite_bytes(heapfile->file_ptr, page_offset, (char*) page->data, page->page_size);
+
+    fprintint(heapfile->file_ptr, page_offset + 8, fixed_len_page_freeslots(page));    
 }
 
 // class RecordIterator {
