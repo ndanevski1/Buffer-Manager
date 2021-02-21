@@ -1,3 +1,6 @@
+#include "Page.hpp"
+#include <cstdio>
+
 typedef struct {
 	FILE *file_ptr;
 	int page_size;
@@ -9,6 +12,8 @@ typedef struct {
 	PageID page_id;
 	int slot;
 } RecordID;
+
+const int PAGES_IN_HEAPFILE = 100;
 
 /**
  * Initalize a heapfile to use the file and page size given.
@@ -38,4 +43,4 @@ class RecordIterator {
 		RecordIterator(Heapfile *heapfile);
 		Record next();
 		bool hasNext();
-}
+};
