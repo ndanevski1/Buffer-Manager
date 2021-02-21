@@ -219,12 +219,33 @@ void write_page(Page *page, Heapfile *heapfile, PageID pid){
     fprintint(heapfile->file_ptr, page_offset + 8, fixed_len_page_freeslots(page));    
 }
 
-// class RecordIterator {
-// 	private:
-// 		Heapfile *heapfile;
-// 		Page *curPage;
-// 	public:
-// 		RecordIterator(Heapfile *heapfile);
-// 		Record next();
-// 		bool hasNext();
-// }
+RecordIterator::RecordIterator(HeapFile *heapfile) {
+    this.heapfile = heapfile;
+    curPage = NULL;
+    curRecord = NULL;
+    page_index = 0;
+    record_index = 0;
+}
+
+bool RecordIterator::hasNext() {
+    if(curPage == NULL) {
+        
+    }
+
+}
+
+Record RecordIterator::next() {
+    return *curRecord;
+}
+class RecordIterator {
+	private:
+		Heapfile *heapfile;
+		Page *curPage;
+        Record *curRecord;
+        int page_index;
+        int record_index;
+	public:
+		RecordIterator(Heapfile *heapfile);
+		Record next();
+		bool hasNext();
+}
