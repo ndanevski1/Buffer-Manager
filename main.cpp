@@ -1,4 +1,5 @@
 #include "HeapFile.hpp"
+#include <string>
 
 // long fscanlong(FILE *f, long p){
 //     fseek(f, p, SEEK_SET);
@@ -23,6 +24,15 @@
 //     return partial;
 // }
 
+const char* string_to_cstring(std::string s){
+    char *c = new char[s.size() + 1];
+    for(int j = 0; j < s.size(); j++){
+        c[j] = s[j];
+    }
+    c[s.size()] = '\0';
+    return (const char*) c;
+}
+
 int main(){
     Heapfile h;
     int page_size = 1000;
@@ -31,5 +41,24 @@ int main(){
 
     alloc_page(&h);
 
-    // printf("%ld %ld %d\n", fscanlong(f, 0), fscanlong(f, 8), fscanint(f, 16));
+    Record r(100);
+    for(int i = 0; i < 100; i++){
+        r[i] = string_to_cstring("abcdefghi");
+    }
+
+    Page p;
+    init_fixed_len_page(&p, NUM_OF_ATTRIBUTES * ATTRIBUTE_SIZE, ATTRIBUTE_SIZE);
+
+    add_fixed_len_page(&p, &r);
+
+    write_page(&p, &h, 0);
+
+    RecordIterator record_iterator(&h);
+    Record x;
+    while(record_iterator.hasNext()){
+        x = record_iterator.next();
+        for(const char* j : x){
+            printf("%s", j);
+        }
+    }
 }

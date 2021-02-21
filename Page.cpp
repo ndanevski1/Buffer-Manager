@@ -96,6 +96,16 @@ void write_fixed_len_page(Page *page, int slot, Record *r) {
 }
 
 /**
+ * Returns true if the given slot is filled.
+ */
+bool fixed_len_page_slot_full(Page *page, int slot){
+    char* bit_array_start = (char*) page -> data + page -> page_size - 4 - 1;
+
+    char* bit_array_word = bit_array_start - slot/8;
+    return ((*bit_array_word) & (1 << (slot % 8))) != 0;
+}
+
+/**
  * Read a record from the page from a given slot.
  */
 void read_fixed_len_page(Page *page, int slot, Record *r) {

@@ -35,6 +35,11 @@ int add_fixed_len_page(Page *page, Record *r);
 void write_fixed_len_page(Page *page, int slot, Record *r);
 
 /**
+ * Returns true if the given slot is filled.
+ */
+bool fixed_len_page_slot_full(Page *page, int slot);
+
+/**
  * Read a record from the page from a given slot.
  */
 void read_fixed_len_page(Page *page, int slot, Record *r);

@@ -177,6 +177,12 @@ PageID alloc_page(Heapfile *heapfile) {
     }
 }
 
+void read_page_at_offset(Heapfile *heapfile, long data_offset, Page *page){
+    page->page_size = heapfile->page_size;
+    page->slot_size = ATTRIBUTE_SIZE;
+    page->data = fseekread(heapfile->file_ptr, data_offset, heapfile->page_size);
+}
+
 /**
  * Read a page into memory
  */
@@ -192,10 +198,9 @@ void read_page(Heapfile *heapfile, PageID pid, Page *page){
 
     long page_offset = current_heapfile.file_offset + (8 + (8+4)*page_in_heap_loc);
     assert(fscanint(heapfile->file_ptr, page_offset + 8) != -1);
+    long page_data_offset = fscanlong(heapfile->file_ptr, page_offset);
 
-    page->page_size = heapfile->page_size;
-    page->slot_size = ATTRIBUTE_SIZE; 
-    page->data = fseekread(heapfile->file_ptr, page_offset, heapfile->page_size);
+    read_page_at_offset(heapfile, page_data_offset, page);
 }
 
 /**
@@ -216,36 +221,100 @@ void write_page(Page *page, Heapfile *heapfile, PageID pid){
 
     fseekwrite_bytes(heapfile->file_ptr, page_offset, (char*) page->data, page->page_size);
 
-    fprintint(heapfile->file_ptr, page_offset + 8, fixed_len_page_freeslots(page));    
+    fprintint(heapfile->file_ptr, page_offset + 8, fixed_len_page_freeslots(page));
 }
 
-RecordIterator::RecordIterator(HeapFile *heapfile) {
-    this.heapfile = heapfile;
-    curPage = NULL;
-    curRecord = NULL;
-    page_index = 0;
-    record_index = 0;
+HeapfileIterator::HeapfileIterator(Heapfile *_cur_heapfile) : cur_heapfile(_cur_heapfile) {}
+
+Heapfile *HeapfileIterator::next(){
+    return cur_heapfile;
+}
+
+bool HeapfileIterator::hasNext(){
+    if(cur_heapfile == NULL){
+        return false;
+    }
+
+    long new_heapfile_offset = fscanlong(cur_heapfile->file_ptr, cur_heapfile->file_offset);
+
+    if(new_heapfile_offset == 0){
+        cur_heapfile = NULL;
+    } else {
+        cur_heapfile->file_offset = new_heapfile_offset;
+    }
+
+    return cur_heapfile != NULL;
+}
+
+PageIterator::PageIterator(Heapfile *_cur_heapfile) : heapfile_iterator(_cur_heapfile),
+                                                      cur_heapfile(_cur_heapfile),
+                                                      cur_page(&dummy), page_index(0) {}
+
+Page *PageIterator::next(){
+    return cur_page;
+}
+
+bool PageIterator::hasNext(){
+    if(cur_heapfile == NULL and !heapfile_iterator.hasNext()){
+        return false;
+    }
+
+    if(cur_heapfile == NULL){
+        cur_heapfile = heapfile_iterator.next();
+        page_index = 0;
+    }
+
+    while(page_index < PAGES_IN_HEAPFILE){
+        long page_offset = cur_heapfile->file_offset + 8 + (8 + 4) * page_index;
+        int page_free_slots = fscanint(cur_heapfile->file_ptr, page_offset + 4);
+        int M = (8*cur_heapfile->page_size - 8*4)/(ATTRIBUTE_SIZE*8+1);
+        if(page_free_slots != M){
+            read_page_at_offset(cur_heapfile, page_offset, cur_page);
+            page_index++;
+            return true;
+        }
+        page_index++;
+    }
+
+    if(page_index == PAGES_IN_HEAPFILE){
+        cur_heapfile = NULL;
+        return hasNext();
+    }
+
+    assert(0);
+}
+
+RecordIterator::RecordIterator(Heapfile *heapfile) : page_iterator(heapfile),
+                                                     cur_page(NULL),
+                                                     cur_record(&dummy) {}
+
+Record RecordIterator::next() {
+    return *cur_record;
 }
 
 bool RecordIterator::hasNext() {
-    if(curPage == NULL) {
-        
+    if(cur_page == NULL and !page_iterator.hasNext()){
+        return false;
     }
 
-}
+    if(cur_page == NULL){
+        cur_page = page_iterator.next();
+        slot_index = 0;
+    }
 
-Record RecordIterator::next() {
-    return *curRecord;
-}
-class RecordIterator {
-	private:
-		Heapfile *heapfile;
-		Page *curPage;
-        Record *curRecord;
-        int page_index;
-        int record_index;
-	public:
-		RecordIterator(Heapfile *heapfile);
-		Record next();
-		bool hasNext();
+    while(slot_index < fixed_len_page_capacity(cur_page)){
+        if(fixed_len_page_slot_full(cur_page, slot_index)){
+            read_fixed_len_page(cur_page, slot_index, cur_record);
+            slot_index++;
+            return true;
+        }
+        slot_index++;
+    }
+
+    if(slot_index == fixed_len_page_capacity(cur_page)){
+        cur_page = NULL;
+        return hasNext();
+    }
+
+    assert(0);
 }

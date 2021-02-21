@@ -36,10 +36,35 @@ void read_page(Heapfile *heapfile, PageID pid, Page *page);
  */
 void write_page(Page *page, Heapfile *heapfile, PageID pid);
 
+class HeapfileIterator {
+    private:
+        Heapfile *cur_heapfile;
+    public:
+        HeapfileIterator(Heapfile *_cur_heapfile);
+        Heapfile *next();
+        bool hasNext();
+};
+
+class PageIterator {
+    private:
+        HeapfileIterator heapfile_iterator;
+        Heapfile *cur_heapfile;
+        Page *cur_page;
+        Page dummy;
+        int page_index;
+    public:
+        PageIterator(Heapfile *_cur_heapfile);
+        Page *next();
+        bool hasNext();
+};
+
 class RecordIterator {
 	private:
-		Heapfile *heapfile;
-		Page *curPage;
+		PageIterator page_iterator;
+		Page *cur_page;
+		Record *cur_record;
+		Record dummy;
+		int slot_index;
 	public:
 		RecordIterator(Heapfile *heapfile);
 		Record next();
