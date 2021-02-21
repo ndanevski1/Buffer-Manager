@@ -13,12 +13,12 @@ Page make_page(int page_size, int slot_size) {
     char* end = (char*) page.data + page.page_size;
     int* mp = ((int*) end) - 1;
     *mp = M;
-    return page; 
+    return page;
 }
 
 /**
  * Initializes a page using the given slot size
- */ 
+ */
 void init_fixed_len_page(Page *page, int page_size, int slot_size) {
     *page = make_page(page_size, slot_size);
 }
@@ -49,7 +49,7 @@ int find_first_free_slot(Page *page) {
     int M = fixed_len_page_capacity(page);
     char* bit_array_start = (char*) page -> data + page -> page_size - 4 - 1;
     char* bit_array_end = (char*) page -> data + page -> page_size - 4 - M;
-    
+
     int bit_index = 0;
     for(char* ptr = bit_array_start; ptr >= bit_array_end; ptr--) {
         if(__builtin_popcount(*ptr) != 8){
@@ -77,7 +77,7 @@ int add_fixed_len_page(Page *page, Record *r) {
         return -1;
 
     write_fixed_len_page(page, first_free_slot, r);
-    
+
     return first_free_slot;
 }
 
@@ -87,12 +87,12 @@ int add_fixed_len_page(Page *page, Record *r) {
 void write_fixed_len_page(Page *page, int slot, Record *r) {
 
     fixed_len_write(r, (char*) page -> data + slot * page -> slot_size);
-    
+
     char* bit_array_start = (char*) page -> data + page -> page_size - 4 - 1;
 
     char* bit_array_word = bit_array_start - slot/8;
     *bit_array_word |= 1 << (slot % 8);
-    
+
 }
 
 /**

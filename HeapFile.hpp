@@ -3,6 +3,7 @@
 
 typedef struct {
 	FILE *file_ptr;
+	long file_offset;
 	int page_size;
 } Heapfile;
 
