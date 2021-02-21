@@ -35,7 +35,7 @@ void fixed_len_read(void *buf, int size, Record *record) {
     char *tempBuf = (char*) buf;
     for(int i = 0; i < NUM_OF_ATTRIBUTES; i++) {
         (*record)[i] = new char[ATTRIBUTE_SIZE];
-        memcpy(tempBuf, (*record)[i], ATTRIBUTE_SIZE);
+        memcpy( (void*) ((*record)[i]), tempBuf, ATTRIBUTE_SIZE);
         tempBuf += ATTRIBUTE_SIZE;
     }
 }

@@ -4,11 +4,6 @@
 #include <algorithm>
 #include <cassert>
 
-struct PageHeader {
-    void* page_ptr;
-    int page_empty_slots;
-};
-
 char* fseekread(FILE *f, long offset, int length){
     fseek(f, offset, SEEK_SET);
     char* b = new char[length];
@@ -35,7 +30,8 @@ long fscanlong(FILE *f, long offset){
     fread(b, 1, long_size, f);
     long partial = 0;
     for(int i = long_size - 1; i >= 0; i--){
-        partial = (partial << 8) | b[i];
+        partial <<= 8;
+        partial |= 0xff & b[i];
     }
     return partial;
 }
@@ -47,7 +43,8 @@ int fscanint(FILE *f, long offset){
     fread(b, 1, int_size, f);
     int partial = 0;
     for(int i = int_size - 1; i >= 0; i--){
-        partial = (partial << 8) | b[i];
+        partial <<= 8;
+        partial |= 0xff & b[i];
     }
     return partial;
 }
@@ -57,10 +54,11 @@ void fprintlong(FILE *f, long offset, long data){
     int long_size = sizeof(long);
     char b[long_size];
     for(int i = 0; i < long_size; i++){
-        b[i] = data & (0xff << (8 * i));
+        b[i] = (data >> (8 * i)) & 0xff;
     }
-    std::reverse(b, b + long_size);
-    fwrite(b, 1, long_size, f);
+    {
+        fwrite(b, 1, long_size, f);
+    }
 }
 
 void fprintint(FILE *f, long offset, int data){
@@ -68,27 +66,23 @@ void fprintint(FILE *f, long offset, int data){
     int int_size = sizeof(int);
     char b[int_size];
     for(int i = 0; i < int_size; i++){
-        b[i] = data & (0xff << (8 * i));
+        b[i] = (data >> (8 * i)) & 0xff;
     }
-    std::reverse(b, b + int_size);
     fwrite(b, 1, int_size, f);
 }
 
 void init_heapfile_with_offset(Heapfile *heapfile, int page_size, FILE *file, long offset) {
-    int space_needed = sizeof(Heapfile *) + PAGES_IN_HEAPFILE * sizeof(PageHeader);
+    int space_needed = sizeof(Heapfile *) + PAGES_IN_HEAPFILE * (8 + 4);
 
     heapfile->file_ptr = file;
     heapfile->file_offset = offset;
     heapfile->page_size = page_size;
-    int M = (8*page_size - 8*4)/(ATTRIBUTE_SIZE*8+1);
 
     char heapfile_data[space_needed];
     memset(heapfile_data, 0, sizeof(heapfile_data));
 
-    int ptr_size = sizeof(void*);
-
     for(int i = 0; i < PAGES_IN_HEAPFILE; i++){
-        char* n_position = (char*) &heapfile_data + 2 * ptr_size + 2 * i * ptr_size;
+        char* n_position = (char*) &heapfile_data + 16 + i * (8 + 4);
         int* n_ptr_int = (int*) n_position;
         *n_ptr_int = -1;
     }
@@ -97,7 +91,6 @@ void init_heapfile_with_offset(Heapfile *heapfile, int page_size, FILE *file, lo
     // 0 0 -1 0 -1 0 -1 0 -1 ...
     fwrite(heapfile_data, 1, space_needed, file);
 }
-
 
 /**
  * Initalize a heapfile to use the file and page size given.
@@ -135,23 +128,20 @@ PageID alloc_page(Heapfile *heapfile) {
         // 0 -1 -> ptr M
         if(found_page_location){
             // new page
-            Page *p = new Page;
-            init_fixed_len_page(p, heapfile->page_size, ATTRIBUTE_SIZE);
+            Page p;
+            init_fixed_len_page(&p, heapfile->page_size, NUM_OF_ATTRIBUTES * ATTRIBUTE_SIZE);
 
             // write page to disk
             fseek(f, 0L, SEEK_END);
-            long page_data_location = ftell(f);
+            long page_data_location = 1208;
 
-            for(int i = 0; i < heapfile->page_size; i++){
-                fseekwrite(f, page_data_location + i, *(((char*) p->data) + i));
-            }
+            fseekwrite_bytes(f, page_data_location, (char*) p.data, heapfile->page_size);
 
             // deallocate page
-            delete[] (char*) p->data;
-            delete p;
+            delete[] (char*) p.data;
 
             fprintlong(f, page_data_location_in_heapfile, page_data_location);
-            int M = (8*heapfile->page_size - 8*4)/(ATTRIBUTE_SIZE*8+1);
+            long M = fixed_len_page_capacity(&p);
             fprintint(f, page_data_location_in_heapfile + 8, M);
             return page_index;
         } else {
@@ -179,7 +169,7 @@ PageID alloc_page(Heapfile *heapfile) {
 
 void read_page_at_offset(Heapfile *heapfile, long data_offset, Page *page){
     page->page_size = heapfile->page_size;
-    page->slot_size = ATTRIBUTE_SIZE;
+    page->slot_size = NUM_OF_ATTRIBUTES * ATTRIBUTE_SIZE;
     page->data = fseekread(heapfile->file_ptr, data_offset, heapfile->page_size);
 }
 
@@ -218,8 +208,9 @@ void write_page(Page *page, Heapfile *heapfile, PageID pid){
 
     long page_offset = current_heapfile.file_offset + (8 + (8+4)*page_in_heap_loc);
     assert(fscanint(heapfile->file_ptr, page_offset + 8) != -1);
+    long page_data_offset = fscanlong(heapfile->file_ptr, page_offset);
 
-    fseekwrite_bytes(heapfile->file_ptr, page_offset, (char*) page->data, page->page_size);
+    fseekwrite_bytes(heapfile->file_ptr, page_data_offset, (char*) page->data, page->page_size);
 
     fprintint(heapfile->file_ptr, page_offset + 8, fixed_len_page_freeslots(page));
 }
@@ -266,10 +257,11 @@ bool PageIterator::hasNext(){
 
     while(page_index < PAGES_IN_HEAPFILE){
         long page_offset = cur_heapfile->file_offset + 8 + (8 + 4) * page_index;
+        long page_data_offset = fscanlong(cur_heapfile->file_ptr, page_offset);
         int page_free_slots = fscanint(cur_heapfile->file_ptr, page_offset + 4);
-        int M = (8*cur_heapfile->page_size - 8*4)/(ATTRIBUTE_SIZE*8+1);
+        int M = (8*cur_heapfile->page_size - 8*4)/(NUM_OF_ATTRIBUTES*ATTRIBUTE_SIZE*8+1);
         if(page_free_slots != M){
-            read_page_at_offset(cur_heapfile, page_offset, cur_page);
+            read_page_at_offset(cur_heapfile, page_data_offset, cur_page);
             page_index++;
             return true;
         }
