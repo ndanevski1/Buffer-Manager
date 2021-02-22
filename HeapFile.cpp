@@ -258,9 +258,9 @@ bool PageIterator::hasNext(){
     while(page_index < PAGES_IN_HEAPFILE){
         long page_offset = cur_heapfile->file_offset + 8 + (8 + 4) * page_index;
         long page_data_offset = fscanlong(cur_heapfile->file_ptr, page_offset);
-        int page_free_slots = fscanint(cur_heapfile->file_ptr, page_offset + 4);
+        int page_free_slots = fscanint(cur_heapfile->file_ptr, page_offset + 8);
         int M = (8*cur_heapfile->page_size - 8*4)/(NUM_OF_ATTRIBUTES*ATTRIBUTE_SIZE*8+1);
-        if(page_free_slots != M){
+        if(page_free_slots != -1){
             read_page_at_offset(cur_heapfile, page_data_offset, cur_page);
             page_index++;
             return true;

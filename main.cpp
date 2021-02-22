@@ -38,7 +38,7 @@ int main(){
         // printf("PERAM\n");
         x = record_iterator.next();
         for(const char* j : x){
-            printf("%10s", j);
+            printf("%s\n", j);
         }
     }
 }
