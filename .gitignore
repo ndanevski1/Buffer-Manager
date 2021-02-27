@@ -1,3 +1,5 @@
+*.page
+*.csv
 a.out
 heapfile.test
 .vscode

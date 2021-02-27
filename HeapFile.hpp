@@ -1,4 +1,5 @@
 #include "Page.hpp"
+#include "utils.hpp"
 #include <cstdio>
 
 typedef struct {

@@ -48,12 +48,12 @@ int fixed_len_page_freeslots(Page *page) {
 int find_first_free_slot(Page *page) {
     int M = fixed_len_page_capacity(page);
     char* bit_array_start = (char*) page -> data + page -> page_size - 4 - 1;
-    char* bit_array_end = (char*) page -> data + page -> page_size - 4 - M;
+    char* bit_array_end = (char*) page -> data + page -> page_size - 4 - (M + 7) / 8;
 
     int bit_index = 0;
     for(char* ptr = bit_array_start; ptr >= bit_array_end; ptr--) {
         if(__builtin_popcount(*ptr) != 8){
-            for(unsigned int i = 0, bit = 1; i < 8; i++, bit <<= 1){
+            for(unsigned int i = 0, bit = 1; i < 8 and i + bit_index < M; i++, bit <<= 1){
                 if(bit & (~(*ptr))){
                     bit_index += i;
                     return bit_index;
