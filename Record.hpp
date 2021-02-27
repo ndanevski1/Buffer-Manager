@@ -4,7 +4,7 @@ typedef const char* V;
 typedef std::vector<V> Record;
 
 const int NUM_OF_ATTRIBUTES = 100;
-const int ATTRIBUTE_SIZE = 10;  // in bytes
+const int ATTRIBUTE_SIZE = 11;  // in bytes
 
 /**
  * Compute the number of bytes required to serialize record

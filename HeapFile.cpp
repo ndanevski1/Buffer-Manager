@@ -170,22 +170,18 @@ bool HeapfileIterator::hasNext(){
     return cur_heapfile != NULL;
 }
 
-PageIterator::PageIterator(Heapfile *_cur_heapfile) : heapfile_iterator(_cur_heapfile),
-                                                      cur_heapfile(_cur_heapfile),
-                                                      cur_page(&dummy), page_index(0) {}
+PageIterator::PageIterator(Heapfile *_cur_heapfile) : cur_heapfile(_cur_heapfile),
+                                                      cur_page(&dummy), page_index(0) {
+    hasNext();
+}
 
 Page *PageIterator::next(){
     return cur_page;
 }
 
 bool PageIterator::hasNext(){
-    if(cur_heapfile == NULL and !heapfile_iterator.hasNext()){
-        return false;
-    }
-
     if(cur_heapfile == NULL){
-        cur_heapfile = heapfile_iterator.next();
-        page_index = 0;
+        return false;
     }
 
     while(page_index < PAGES_IN_HEAPFILE){
@@ -202,42 +198,7 @@ bool PageIterator::hasNext(){
 
     if(page_index == PAGES_IN_HEAPFILE){
         cur_heapfile = NULL;
-        return hasNext();
-    }
-
-    assert(0);
-}
-
-RecordIterator::RecordIterator(Heapfile *heapfile) : page_iterator(heapfile),
-                                                     cur_page(NULL),
-                                                     cur_record(&dummy) {}
-
-Record RecordIterator::next() {
-    return *cur_record;
-}
-
-bool RecordIterator::hasNext() {
-    if(cur_page == NULL and !page_iterator.hasNext()){
         return false;
-    }
-
-    if(cur_page == NULL){
-        cur_page = page_iterator.next();
-        slot_index = 0;
-    }
-
-    while(slot_index < fixed_len_page_capacity(cur_page)){
-        if(fixed_len_page_slot_full(cur_page, slot_index)){
-            read_fixed_len_page(cur_page, slot_index, cur_record);
-            slot_index++;
-            return true;
-        }
-        slot_index++;
-    }
-
-    if(slot_index == fixed_len_page_capacity(cur_page)){
-        cur_page = NULL;
-        return hasNext();
     }
 
     assert(0);

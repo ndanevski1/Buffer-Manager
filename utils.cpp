@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <cstring>
 
 char* fseekread(FILE *f, long offset, int length){
     fseek(f, offset, SEEK_SET);
@@ -52,9 +53,7 @@ void fprintlong(FILE *f, long offset, long data){
     for(int i = 0; i < long_size; i++){
         b[i] = (data >> (8 * i)) & 0xff;
     }
-    {
-        fwrite(b, 1, long_size, f);
-    }
+    fwrite(b, 1, long_size, f);
 }
 
 void fprintint(FILE *f, long offset, int data){
@@ -67,11 +66,12 @@ void fprintint(FILE *f, long offset, int data){
     fwrite(b, 1, int_size, f);
 }
 
-const char* string_to_cstring(std::string s){
-    char *c = new char[s.size() + 1];
-    for(int j = 0; j < s.size(); j++){
+const char* string_to_cstring(std::string s, int allocate_bytes){
+    char *c = new char[allocate_bytes];
+    memset(c, 0, allocate_bytes);
+    for(int j = 0; j < s.size() and j < allocate_bytes - 1; j++){
         c[j] = s[j];
     }
-    c[s.size()] = '\0';
+    c[allocate_bytes - 1] = '\0';
     return (const char*) c;
 }

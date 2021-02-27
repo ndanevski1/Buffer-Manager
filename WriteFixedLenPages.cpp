@@ -31,7 +31,7 @@ void write_fixed_len_pages(std::ifstream &csv_file, FILE *page_file, int page_si
         while(s_stream.good()) {
             std::string substr;
             getline(s_stream, substr, ','); //get first string delimited by comma
-            row.push_back(string_to_cstring(substr));
+            row.push_back(string_to_cstring(substr, ATTRIBUTE_SIZE));
         }
         num_of_records++;
 
@@ -43,25 +43,28 @@ void write_fixed_len_pages(std::ifstream &csv_file, FILE *page_file, int page_si
         }
     }
     append_page_to_page_file(page, page_file, page_size);
-    
+
     auto end = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(end - start); 
-    
-    std::cout << "NUMBER OF RECORDS: " << num_of_records << std::endl; 
-    std::cout << "NUMBER OF PAGES: " << num_of_pages << std::endl; 
-    std::cout << "TIME: " << duration.count() << " microseconds." << std::endl; 
+    auto duration = duration_cast<microseconds>(end - start);
+
+    std::cout << "NUMBER OF RECORDS: " << num_of_records << std::endl;
+    std::cout << "NUMBER OF PAGES: " << num_of_pages << std::endl;
+    std::cout << "WRITE TIME: " << duration.count() << " microseconds." << std::endl;
 }
 
 int main(int argc, char** argv) {
-    assert(argc == 4);
+    if(argc != 4){
+        printf("Usage: write_fixed_len_pages <csv_file> <page_file> <page_size>\n");
+        exit(1);
+    }
     char *csv_file_name = argv[1];
     char *page_file_name = argv[2];
     int page_size = atoi(argv[3]);
     std::ifstream csv_file (csv_file_name);
     FILE *page_file = fopen(page_file_name, "w+");
-    
 
     write_fixed_len_pages(csv_file, page_file, page_size);
 
     csv_file.close();
+    fclose(page_file);
 }

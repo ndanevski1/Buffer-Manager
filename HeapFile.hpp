@@ -48,7 +48,6 @@ class HeapfileIterator {
 
 class PageIterator {
     private:
-        HeapfileIterator heapfile_iterator;
         Heapfile *cur_heapfile;
         Page *cur_page;
         Page dummy;
@@ -57,17 +56,4 @@ class PageIterator {
         PageIterator(Heapfile *_cur_heapfile);
         Page *next();
         bool hasNext();
-};
-
-class RecordIterator {
-	private:
-		PageIterator page_iterator;
-		Page *cur_page;
-		Record *cur_record;
-		Record dummy;
-		int slot_index;
-	public:
-		RecordIterator(Heapfile *heapfile);
-		Record next();
-		bool hasNext();
 };

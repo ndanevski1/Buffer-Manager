@@ -1,5 +1,6 @@
 #include <bit>
 #include <cstring>
+#include <cassert>
 #include "Page.hpp"
 
 Page make_page(int page_size, int slot_size) {
@@ -110,4 +111,36 @@ bool fixed_len_page_slot_full(Page *page, int slot){
  */
 void read_fixed_len_page(Page *page, int slot, Record *r) {
     fixed_len_read((char*) page -> data + slot * page -> slot_size, NUM_OF_ATTRIBUTES * ATTRIBUTE_SIZE, r);
+}
+
+RecordIterator::RecordIterator(Page *page) : cur_page(page),
+                                             cur_record(&dummy),
+                                             slot_index(0) {
+    hasNext();
+}
+
+Record RecordIterator::next() {
+    return *cur_record;
+}
+
+bool RecordIterator::hasNext() {
+    if(cur_page == NULL){
+        return false;
+    }
+
+    while(slot_index < fixed_len_page_capacity(cur_page)){
+        if(fixed_len_page_slot_full(cur_page, slot_index)){
+            read_fixed_len_page(cur_page, slot_index, cur_record);
+            slot_index++;
+            return true;
+        }
+        slot_index++;
+    }
+
+    if(slot_index == fixed_len_page_capacity(cur_page)){
+        cur_page = NULL;
+        return false;
+    }
+
+    assert(0);
 }
