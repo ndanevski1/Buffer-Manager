@@ -5,9 +5,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <chrono> 
+#include <chrono>
 
-using namespace std::chrono; 
+using namespace std::chrono;
 
 void append_page_to_page_file(Page &page, FILE *page_file, int page_size) {
     fseek(page_file, 0, SEEK_END);
