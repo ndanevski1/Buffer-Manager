@@ -36,7 +36,7 @@ int fixed_len_page_capacity(Page *page) {
 int fixed_len_page_freeslots(Page *page) {
     int M = fixed_len_page_capacity(page);
     char* bit_array_start = (char*) page -> data + page -> page_size - 4 - 1;
-    char* bit_array_end = (char*) page -> data + page -> page_size - 4 - M;
+    char* bit_array_end = (char*) page -> data + page -> page_size - 4 - (M + 7) / 8;
 
     int takenSpots = 0;
     for(char* ptr = bit_array_start; ptr >= bit_array_end; ptr--) {

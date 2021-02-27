@@ -115,7 +115,7 @@ PageID alloc_page(Heapfile *heapfile) {
         bool found_page_location = false;
         long curr_page_position = 16;
         for(int i = 0; i < PAGES_IN_HEAPFILE; i++){
-            long capacity_available = fscanint(f, curr_page_position);
+            int capacity_available = fscanint(f, curr_page_position);
             if(capacity_available == -1){
                 page_data_location_in_heapfile = curr_page_position - 8;
                 found_page_location = true;
@@ -259,7 +259,6 @@ bool PageIterator::hasNext(){
         long page_offset = cur_heapfile->file_offset + 8 + (8 + 4) * page_index;
         long page_data_offset = fscanlong(cur_heapfile->file_ptr, page_offset);
         int page_free_slots = fscanint(cur_heapfile->file_ptr, page_offset + 8);
-        int M = (8*cur_heapfile->page_size - 8*4)/(NUM_OF_ATTRIBUTES*ATTRIBUTE_SIZE*8+1);
         if(page_free_slots != -1){
             read_page_at_offset(cur_heapfile, page_data_offset, cur_page);
             page_index++;
