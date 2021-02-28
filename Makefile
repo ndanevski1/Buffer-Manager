@@ -22,8 +22,8 @@ scan: Scan.o utils.o Record.o Page.o HeapFile.o
 insert: Insert.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 	$(CC) -o $@ $^
 
-update: update.cc library.o
-	$(CC) -o $@ $< library.o
+update: Update.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+	$(CC) -o $@ $^
 
 delete: delete.cc library.o
 	$(CC) -o $@ $< library.o
@@ -39,5 +39,8 @@ select2: select2.cc library.o
 
 select3: select3.cc library.o
 	$(CC) -o $@ $< library.o
+
+all: $(OBJ)
+
 clean:
-	rm -f $(OBJ) *.csv *.page
+	rm -f $(OBJ) *.csv *.page *.heap

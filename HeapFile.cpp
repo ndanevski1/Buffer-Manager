@@ -145,6 +145,42 @@ void write_page(Page *page, Heapfile *heapfile, PageID pid){
     fprintint(heapfile->file_ptr, page_offset + 8, fixed_len_page_freeslots(page));
 }
 
+long heapfile_directory_size() {
+    return sizeof(long) + PAGES_IN_HEAPFILE * (sizeof(long) + sizeof(int));
+}
+
+bool get_record_info(Heapfile *heapfile, RecordID record_id, 
+                     long &heapfile_offset, long &page_offset, long &record_offset) {
+
+    int hi = 0, pi = 0, ri = 0;
+    HeapfileIterator heapfile_iterator(heapfile);
+    do {
+        Heapfile *h = heapfile_iterator.next();
+        pi = 0;
+        PageIterator page_iterator(h);
+        do {
+            Page *p = page_iterator.next();
+            RecordIterator record_iterator(p);
+            ri = 0;
+            do {
+                Record record = record_iterator.next();
+                if(record_id.page_id == hi * PAGES_IN_HEAPFILE + pi && record_id.slot == ri){
+                    heapfile_offset = h->file_offset;
+                    page_offset = heapfile_offset + heapfile_directory_size() + h->page_size * pi;
+                    record_offset = page_offset + fixed_len_sizeof(&record) * ri;
+                    return true;
+                }
+                ri++;
+            } while(record_iterator.hasNext());
+            pi++;
+        } while(page_iterator.hasNext());
+        hi++;
+    } while(heapfile_iterator.hasNext());
+
+    return false;
+}
+
+
 HeapfileIterator::HeapfileIterator(Heapfile *_cur_heapfile) : cur_heapfile(_cur_heapfile) {}
 
 Heapfile *HeapfileIterator::next(){
