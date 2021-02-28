@@ -1,8 +1,11 @@
 # Makefile
 CC = g++
-OBJ = write_fixed_len_pages read_fixed_len_page csv2heapfile \
-		scan insert update delete select \
+OBJ = serialization_experiment write_fixed_len_pages read_fixed_len_page \
+		csv2heapfile scan insert update delete select \
 		csv2colstore select2 select3
+
+serialization_experiment: SerializationExperiment.o Record.o utils.o
+	$(CC) -o $@ $^
 
 write_fixed_len_pages: WriteFixedLenPages.o utils.o Record.o Page.o HeapFile.o
 	$(CC) -o $@ $^

@@ -8,10 +8,7 @@
  * Compute the number of bytes required to serialize record
  */
 int fixed_len_sizeof(Record *record) {
-    int numOfBytes = 0;
-    for(auto attribute : *record)
-        numOfBytes += ATTRIBUTE_SIZE;
-    return numOfBytes;
+    return NUM_OF_ATTRIBUTES * ATTRIBUTE_SIZE;
 }
 
 /**
