@@ -41,12 +41,13 @@ PageID alloc_page(Heapfile *heapfile) {
 
     FILE *f = heapfile->file_ptr;
 
+    long offset = heapfile->file_offset;
     next_heapfile_offset = fscanlong(f, heapfile->file_offset);
     if(next_heapfile_offset == 0){
         long page_data_location_in_heapfile = 0;
         int page_index = 0;
         bool found_page_location = false;
-        long curr_page_position = 16;
+        long curr_page_position = offset + 16;
         for(int i = 0; i < PAGES_IN_HEAPFILE; i++){
             int capacity_available = fscanint(f, curr_page_position);
             if(capacity_available == -1){
@@ -85,11 +86,7 @@ PageID alloc_page(Heapfile *heapfile) {
             init_heapfile_with_offset(&heap, heapfile->page_size, f, heap_data_location);
             fprintlong(f, heapfile->file_offset, heap_data_location);
 
-            Heapfile next_heapfile;
-            next_heapfile.file_ptr = heapfile->file_ptr;
-            next_heapfile.file_offset = heap_data_location;
-            next_heapfile.page_size = heapfile->page_size;
-            return PAGES_IN_HEAPFILE + alloc_page(&next_heapfile);
+            return PAGES_IN_HEAPFILE + alloc_page(&heap);
         }
     } else {
         Heapfile next_heapfile;

@@ -1,24 +1,22 @@
-#include "Page.hpp"
 #include "utils.hpp"
+#include "HeapFile.hpp"
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <chrono>
+#include <cmath>
 
 using namespace std::chrono;
 
-void append_page_to_page_file(Page &page, FILE *page_file, int page_size) {
-    fseek(page_file, 0, SEEK_END);
-    long file_end = ftell(page_file);
-    fseekwrite_bytes(page_file, file_end, (char*) page.data, page_size);
-}
-
-void write_fixed_len_pages(std::ifstream &csv_file, FILE *page_file, int page_size) {
+void csv2heapfile(std::ifstream &csv_file, FILE *heap_file, int page_size) {
     auto start = high_resolution_clock::now();
     int num_of_records = 0;
     int num_of_pages = 1;
+
+    Heapfile h;
+    init_heapfile(&h, page_size, heap_file);
 
     std::string line;
     Page page;
@@ -35,35 +33,39 @@ void write_fixed_len_pages(std::ifstream &csv_file, FILE *page_file, int page_si
         num_of_records++;
 
         if(add_fixed_len_page(&page, &row) == -1) {
-            append_page_to_page_file(page, page_file, page_size);
+            PageID pid = alloc_page(&h);
+            write_page(&page, &h, pid);
             init_fixed_len_page(&page, page_size, NUM_OF_ATTRIBUTES * ATTRIBUTE_SIZE);
             add_fixed_len_page(&page, &row);
             num_of_pages++;
         }
     }
-    append_page_to_page_file(page, page_file, page_size);
+    PageID pid = alloc_page(&h);
+    write_page(&page, &h, pid);
+    int num_of_heapfiles = pid / PAGES_IN_HEAPFILE + (pid % PAGES_IN_HEAPFILE != 0);
 
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(end - start);
 
     std::cout << "NUMBER OF RECORDS: " << num_of_records << std::endl;
     std::cout << "NUMBER OF PAGES: " << num_of_pages << std::endl;
+    std::cout << "NUMBER OF HEAPFILES: " << num_of_heapfiles << std::endl;
     std::cout << "WRITE TIME: " << duration.count() << " microseconds." << std::endl;
 }
 
 int main(int argc, char** argv) {
     if(argc != 4){
-        printf("Usage: write_fixed_len_pages <csv_file> <page_file> <page_size>\n");
+        printf("Usage: csv2heapfile <csv_file> <heapfile> <page_size>\n");
         exit(1);
     }
     char *csv_file_name = argv[1];
-    char *page_file_name = argv[2];
+    char *heap_file_name = argv[2];
     int page_size = atoi(argv[3]);
     std::ifstream csv_file (csv_file_name);
-    FILE *page_file = fopen(page_file_name, "w+");
+    FILE *heap_file = fopen(heap_file_name, "w+");
 
-    write_fixed_len_pages(csv_file, page_file, page_size);
+    csv2heapfile(csv_file, heap_file, page_size);
 
     csv_file.close();
-    fclose(page_file);
+    fclose(heap_file);
 }
