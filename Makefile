@@ -13,14 +13,14 @@ write_fixed_len_pages: WriteFixedLenPages.o utils.o Record.o Page.o HeapFile.o
 read_fixed_len_page: ReadFixedLenPage.o utils.o Record.o Page.o HeapFile.o
 	$(CC) -o $@ $^
 
-csv2heapfile: CSV2HeapFile.o utils.o Record.o Page.o HeapFile.o
+csv2heapfile: CSV2HeapFile.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 	$(CC) -o $@ $^ 
 
 scan: Scan.o utils.o Record.o Page.o HeapFile.o
 	$(CC) -o $@ $^
 
-insert: insert.cc library.o
-	$(CC) -o $@ $< library.o
+insert: Insert.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+	$(CC) -o $@ $^
 
 update: update.cc library.o
 	$(CC) -o $@ $< library.o
