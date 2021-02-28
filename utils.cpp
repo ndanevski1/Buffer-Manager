@@ -3,7 +3,8 @@
 
 char* fseekread(FILE *f, long offset, int length){
     fseek(f, offset, SEEK_SET);
-    char* b = new char[length];
+    char* b = new char[length + 1];
+    b[length] = '\0';
     fread(b, 1, length, f);
     return b;
 }

@@ -34,24 +34,24 @@ int main(){
     write_page(&p, &h, 1);
 
     HeapfileIterator heapfile_iterator(&h);
-    do {
+    while(heapfile_iterator.hasNext()) {
         Heapfile *i = heapfile_iterator.next();
 
         printf("Najde heapfile\n");
         PageIterator page_iterator(i);
-        do {
+        while(page_iterator.hasNext()) {
             Page *j = page_iterator.next();
             printf("Najde page\n");
 
             RecordIterator record_iterator(j);
-            do {
+            while(record_iterator.hasNext()) {
                 Record k = record_iterator.next();
                 printf("Najde record\n");
 
                 for(const char* l : k){
                     printf("%s\n", l);
                 }
-            } while(record_iterator.hasNext());
-        } while(page_iterator.hasNext());
-    } while(heapfile_iterator.hasNext());
+            }
+        }
+    }
 }

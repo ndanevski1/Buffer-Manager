@@ -28,7 +28,7 @@ void read_fixed_len_page(FILE *page_file, int page_size) {
 
         memcpy(page.data, page_data, page_size);
         RecordIterator record_iterator(&page);
-        do {
+        while(record_iterator.hasNext()) {
             Record record = record_iterator.next();
             record_count++;
 
@@ -39,7 +39,7 @@ void read_fixed_len_page(FILE *page_file, int page_size) {
                     printf("%s\n", record[j]);
                 }
             }
-        } while(record_iterator.hasNext());
+        }
     }
 
     auto end = high_resolution_clock::now();

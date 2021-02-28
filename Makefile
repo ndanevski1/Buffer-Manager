@@ -25,8 +25,8 @@ insert: Insert.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 update: Update.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 	$(CC) -o $@ $^
 
-delete: delete.cc library.o
-	$(CC) -o $@ $< library.o
+delete: Delete.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+	$(CC) -o $@ $^
 
 select: select.cc library.o
 	$(CC) -o $@ $< library.o

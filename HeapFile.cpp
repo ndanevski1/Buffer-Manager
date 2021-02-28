@@ -154,15 +154,15 @@ bool get_record_info(Heapfile *heapfile, RecordID record_id,
 
     int hi = 0, pi = 0, ri = 0;
     HeapfileIterator heapfile_iterator(heapfile);
-    do {
+    while(heapfile_iterator.hasNext()){
         Heapfile *h = heapfile_iterator.next();
         pi = 0;
         PageIterator page_iterator(h);
-        do {
+        while(page_iterator.hasNext()) {
             Page *p = page_iterator.next();
             RecordIterator record_iterator(p);
             ri = 0;
-            do {
+            while(record_iterator.hasNext()) {
                 Record record = record_iterator.next();
                 if(record_id.page_id == hi * PAGES_IN_HEAPFILE + pi && record_id.slot == ri){
                     heapfile_offset = h->file_offset;
@@ -171,11 +171,11 @@ bool get_record_info(Heapfile *heapfile, RecordID record_id,
                     return true;
                 }
                 ri++;
-            } while(record_iterator.hasNext());
+            }
             pi++;
-        } while(page_iterator.hasNext());
+        }
         hi++;
-    } while(heapfile_iterator.hasNext());
+    }
 
     return false;
 }
@@ -184,13 +184,15 @@ bool get_record_info(Heapfile *heapfile, RecordID record_id,
 HeapfileIterator::HeapfileIterator(Heapfile *_cur_heapfile) : cur_heapfile(_cur_heapfile) {}
 
 Heapfile *HeapfileIterator::next(){
-    return cur_heapfile;
+    return &curr_result;
 }
 
 bool HeapfileIterator::hasNext(){
     if(cur_heapfile == NULL){
         return false;
     }
+
+    curr_result = *cur_heapfile;
 
     long new_heapfile_offset = fscanlong(cur_heapfile->file_ptr, cur_heapfile->file_offset);
 
@@ -199,19 +201,17 @@ bool HeapfileIterator::hasNext(){
     } else {
         cur_heapfile->file_offset = new_heapfile_offset;
     }
-
-    return cur_heapfile != NULL;
+    return true;
 }
 
 PageIterator::PageIterator(Heapfile *_cur_heapfile) : cur_heapfile(_cur_heapfile),
-                                                      cur_page(&dummy), page_index(0) {
-    hasNext();
-}
+                                                      cur_page(&dummy), page_index(0) {}
 
 Page *PageIterator::next(){
     return cur_page;
 }
 
+// Goes through pages, even if they have no records.
 bool PageIterator::hasNext(){
     if(cur_heapfile == NULL){
         return false;

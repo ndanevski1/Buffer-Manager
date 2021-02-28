@@ -115,9 +115,7 @@ void read_fixed_len_page(Page *page, int slot, Record *r) {
 
 RecordIterator::RecordIterator(Page *page) : cur_page(page),
                                              cur_record(&dummy),
-                                             slot_index(0) {
-    hasNext();
-}
+                                             slot_index(0) {}
 
 Record RecordIterator::next() {
     return *cur_record;

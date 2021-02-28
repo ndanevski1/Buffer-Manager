@@ -16,19 +16,21 @@ void scan(FILE *heap_file, int page_size) {
     int num_of_heapfiles = 0;
 
     Heapfile h;
-    init_heapfile(&h, page_size, heap_file);
+    h.file_ptr = heap_file;
+    h.file_offset = 0;
+    h.page_size = page_size;
 
     HeapfileIterator heapfile_iterator(&h);
-    do {
+    while(heapfile_iterator.hasNext()) {
         Heapfile *i = heapfile_iterator.next();
         num_of_heapfiles++;
         PageIterator page_iterator(i);
-        do {
+        while(page_iterator.hasNext()) {
             Page *j = page_iterator.next();
             num_of_pages++;
 
             RecordIterator record_iterator(j);
-            do {
+            while(record_iterator.hasNext()) {
                 Record record = record_iterator.next();
                 num_of_records++;
                 for(int j = 0; j < record.size(); j++) {
@@ -38,9 +40,9 @@ void scan(FILE *heap_file, int page_size) {
                         printf("%s\n", record[j]);
                     }
                 }
-            } while(record_iterator.hasNext());
-        } while(page_iterator.hasNext());
-    } while(heapfile_iterator.hasNext());
+            }
+        }
+    }
 
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(end - start);

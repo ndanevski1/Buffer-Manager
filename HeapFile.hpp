@@ -45,10 +45,11 @@ bool get_record_info(Heapfile *heapfile, RecordID record_id,
 
 RecordID select_record_with_attribute_between(
     Heapfile *heapfile, int attribute_id, char *start, char *end, Record &record);
-    
+
 class HeapfileIterator {
     private:
         Heapfile *cur_heapfile;
+        Heapfile curr_result;
     public:
         HeapfileIterator(Heapfile *_cur_heapfile);
         Heapfile *next();
