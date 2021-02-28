@@ -5,8 +5,9 @@ for s in $seq
     make clean > /dev/null
     make write_fixed_len_pages read_fixed_len_page > /dev/null
     python3 mkcsv.py csv.csv 1000 > /dev/null
-    echo $s
+    echo Page size: $s
     ./write_fixed_len_pages csv.csv page.page $s
     ./read_fixed_len_page page.page $s > /dev/null
+    echo
 end
 
