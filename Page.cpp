@@ -121,6 +121,10 @@ Record RecordIterator::next() {
     return *cur_record;
 }
 
+int RecordIterator::nextSlot() {
+    return slot_index - 1;
+}
+
 bool RecordIterator::hasNext() {
     if(cur_page == NULL){
         return false;

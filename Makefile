@@ -14,7 +14,7 @@ read_fixed_len_page: ReadFixedLenPage.o utils.o Record.o Page.o HeapFile.o
 	$(CC) -o $@ $^
 
 csv2heapfile: CSV2HeapFile.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
-	$(CC) -o $@ $^ 
+	$(CC) -o $@ $^
 
 scan: Scan.o utils.o Record.o Page.o HeapFile.o
 	$(CC) -o $@ $^
@@ -28,8 +28,8 @@ update: Update.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 delete: Delete.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 	$(CC) -o $@ $^
 
-select: select.cc library.o
-	$(CC) -o $@ $< library.o
+select: Select.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+	$(CC) -o $@ $^
 
 csv2colstore: csv2colstore.cc library.o
 	$(CC) -o $@ $< library.o

@@ -149,7 +149,7 @@ long heapfile_directory_size() {
     return sizeof(long) + PAGES_IN_HEAPFILE * (sizeof(long) + sizeof(int));
 }
 
-bool get_record_info(Heapfile *heapfile, RecordID record_id, 
+bool get_record_info(Heapfile *heapfile, RecordID record_id,
                      long &heapfile_offset, long &page_offset, long &record_offset) {
 
     int hi = 0, pi = 0, ri = 0;
@@ -164,7 +164,7 @@ bool get_record_info(Heapfile *heapfile, RecordID record_id,
             ri = 0;
             while(record_iterator.hasNext()) {
                 Record record = record_iterator.next();
-                if(record_id.page_id == hi * PAGES_IN_HEAPFILE + pi && record_id.slot == ri){
+                if(record_id.page_id == hi * PAGES_IN_HEAPFILE + pi && record_id.slot == record_iterator.nextSlot()){
                     heapfile_offset = h->file_offset;
                     page_offset = heapfile_offset + heapfile_directory_size() + h->page_size * pi;
                     record_offset = page_offset + fixed_len_sizeof(&record) * ri;
@@ -180,6 +180,42 @@ bool get_record_info(Heapfile *heapfile, RecordID record_id,
     return false;
 }
 
+// RecordID select_record_with_attribute_between(
+//         Heapfile *heapfile, int attribute_id, char *start, char *end, Record *record){
+//     RecordID rec_id;
+//     rec_id.page_id = rec_id.slot = -1;
+
+//     int hi = 0, pi = 0, ri = 0;
+//     HeapfileIterator heapfile_iterator(heapfile);
+//     while(heapfile_iterator.hasNext()) {
+//         Heapfile *h = heapfile_iterator.next();
+//         pi = 0;
+//         PageIterator page_iterator(h);
+//         while(page_iterator.hasNext()) {
+//             Page *p = page_iterator.next();
+//             RecordIterator record_iterator(p);
+//             ri = 0;
+//             while(record_iterator.hasNext()) {
+//                 Record curr_record = record_iterator.next();
+//                 const char *cmp_attribute = curr_record[attribute_id];
+//                 if(strncmp(cmp_attribute, start, 5) >= 0 && strncmp(cmp_attribute, end, 5) <= 0){
+//                     rec_id.page_id = hi * PAGES_IN_HEAPFILE + pi;
+//                     rec_id.slot = record_iterator.nextSlot();
+//                     record->resize(curr_record.size());
+//                     for(int i = 0; i < curr_record.size(); i++){
+//                         (*record)[i] = curr_record[i];
+//                     }
+//                     return rec_id;
+//                 }
+//                 ri++;
+//             }
+//             pi++;
+//         }
+//         hi++;
+//     }
+
+//     return rec_id;
+// }
 
 HeapfileIterator::HeapfileIterator(Heapfile *_cur_heapfile) : cur_heapfile(_cur_heapfile) {}
 

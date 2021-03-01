@@ -53,5 +53,6 @@ class RecordIterator {
     public:
         RecordIterator(Page *page);
         Record next();
+        int nextSlot();
         bool hasNext();
 };

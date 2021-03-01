@@ -40,11 +40,11 @@ void write_page(Page *page, Heapfile *heapfile, PageID pid);
 /**
  * afafs
  */
-bool get_record_info(Heapfile *heapfile, RecordID record_id, 
+bool get_record_info(Heapfile *heapfile, RecordID record_id,
                      long &heapfile_offset, long &page_offset, long &record_offset);
 
 RecordID select_record_with_attribute_between(
-    Heapfile *heapfile, int attribute_id, char *start, char *end, Record &record);
+    Heapfile *heapfile, int attribute_id, char *start, char *end, Record *record);
 
 class HeapfileIterator {
     private:
