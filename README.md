@@ -1,10 +1,10 @@
 # Buffer-Manager
- - [ ] csv2heapfile
- - [ ] scan
- - [ ] insert
- - [ ] update
- - [ ] delete
- - [ ] select
+ - [x] csv2heapfile
+ - [x] scan
+ - [x] insert
+ - [x] update
+ - [x] delete
+ - [x] select
  - [ ] heapfile experiment
  - [ ] colstore
  - [ ] select2
