@@ -6,7 +6,7 @@
  - [x] delete
  - [x] select
  - [ ] heapfile experiment
- - [ ] colstore
- - [ ] select2
- - [ ] select3
+ - [x] colstore
+ - [x] select2
+ - [x] select3
  - [ ] col experiment

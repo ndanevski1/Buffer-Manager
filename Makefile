@@ -34,11 +34,11 @@ select: Select.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 csv2colstore: CSV2ColStore.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 	$(CC) -o $@ $^
 
-select2: select2.cc library.o
-	$(CC) -o $@ $< library.o
+select2: Select2.o utils.o Record.o Page.o HeapFile.o CSVUtils.o ColStore.o
+	$(CC) -o $@ $^
 
-select3: select3.cc library.o
-	$(CC) -o $@ $< library.o
+select3: Select3.o utils.o Record.o Page.o HeapFile.o CSVUtils.o ColStore.o
+	$(CC) -o $@ $^
 
 all: $(OBJ)
 
