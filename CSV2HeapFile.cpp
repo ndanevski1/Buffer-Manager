@@ -25,7 +25,7 @@ void csv2heapfile(std::ifstream &csv_file, FILE *heap_file, int page_size) {
     std::cout << "NUMBER OF RECORDS: " << num_of_records << std::endl;
     std::cout << "NUMBER OF PAGES: " << num_of_pages << std::endl;
     std::cout << "NUMBER OF HEAPFILES: " << num_of_heapfiles << std::endl;
-    std::cout << "WRITE TIME: " << duration.count() << " microseconds." << std::endl;
+    std::cout << "CREATE TIME: " << duration.count() << " microseconds." << std::endl;
 }
 
 int main(int argc, char** argv) {

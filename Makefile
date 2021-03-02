@@ -31,8 +31,8 @@ delete: Delete.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 select: Select.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
 	$(CC) -o $@ $^
 
-csv2colstore: csv2colstore.cc library.o
-	$(CC) -o $@ $< library.o
+csv2colstore: CSV2ColStore.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+	$(CC) -o $@ $^
 
 select2: select2.cc library.o
 	$(CC) -o $@ $< library.o
