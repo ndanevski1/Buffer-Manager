@@ -4,43 +4,50 @@ OBJ = serialization_experiment write_fixed_len_pages read_fixed_len_page \
 		csv2heapfile scan insert update delete select \
 		csv2colstore select2 select3
 
-serialization_experiment: SerializationExperiment.o Record.o utils.o
+OBJS = $(OBJDIR)/utils.o $(OBJDIR)/Record.o $(OBJDIR)/Page.o $(OBJDIR)/HeapFile.o $(OBJDIR)/CSVUtils.o $(OBJDIR)/ColStore.o
+OBJDIR = obj
+SRCDIR = src
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	mkdir -p obj; $(CC) -o $@ -c $<
+
+serialization_experiment: $(OBJDIR)/SerializationExperiment.o $(OBJS)
 	$(CC) -o $@ $^
 
-write_fixed_len_pages: WriteFixedLenPages.o utils.o Record.o Page.o HeapFile.o
+write_fixed_len_pages: $(OBJDIR)/WriteFixedLenPages.o $(OBJS)
 	$(CC) -o $@ $^
 
-read_fixed_len_page: ReadFixedLenPage.o utils.o Record.o Page.o HeapFile.o
+read_fixed_len_page: $(OBJDIR)/ReadFixedLenPage.o $(OBJS)
 	$(CC) -o $@ $^
 
-csv2heapfile: CSV2HeapFile.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+csv2heapfile: $(OBJDIR)/CSV2HeapFile.o $(OBJS)
 	$(CC) -o $@ $^
 
-scan: Scan.o utils.o Record.o Page.o HeapFile.o
+scan: $(OBJDIR)/Scan.o $(OBJS)
 	$(CC) -o $@ $^
 
-insert: Insert.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+insert: $(OBJDIR)/Insert.o $(OBJS)
 	$(CC) -o $@ $^
 
-update: Update.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+update: $(OBJDIR)/Update.o $(OBJS)
 	$(CC) -o $@ $^
 
-delete: Delete.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+delete: $(OBJDIR)/Delete.o $(OBJS)
 	$(CC) -o $@ $^
 
-select: Select.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+select: $(OBJDIR)/Select.o $(OBJS)
 	$(CC) -o $@ $^
 
-csv2colstore: CSV2ColStore.o utils.o Record.o Page.o HeapFile.o CSVUtils.o
+csv2colstore: $(OBJDIR)/CSV2ColStore.o $(OBJS)
 	$(CC) -o $@ $^
 
-select2: Select2.o utils.o Record.o Page.o HeapFile.o CSVUtils.o ColStore.o
+select2: $(OBJDIR)/Select2.o $(OBJS)
 	$(CC) -o $@ $^
 
-select3: Select3.o utils.o Record.o Page.o HeapFile.o CSVUtils.o ColStore.o
+select3: $(OBJDIR)/Select3.o $(OBJS)
 	$(CC) -o $@ $^
 
 all: $(OBJ)
 
 clean:
-	rm -r -f $(OBJ) *.csv *.page *.heap *.col *.o
+	rm -r -f $(OBJ) *.csv *.page *.heap *.col obj *.o
