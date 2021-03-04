@@ -43,4 +43,4 @@ select3: Select3.o utils.o Record.o Page.o HeapFile.o CSVUtils.o ColStore.o
 all: $(OBJ)
 
 clean:
-	rm -f $(OBJ) *.csv *.page *.heap
+	rm -r -f $(OBJ) *.csv *.page *.heap *.col *.o

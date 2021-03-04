@@ -34,5 +34,5 @@ void add_csv_to_heapfile(std::ifstream &csv_file, Heapfile h, int page_size,
     }
     PageID pid = alloc_page(&h);
     write_page(&page, &h, pid);
-    num_of_heapfiles = pid / PAGES_IN_HEAPFILE + (pid % PAGES_IN_HEAPFILE != 0);    
+    num_of_heapfiles = (pid + 1) / PAGES_IN_HEAPFILE + ((pid + 1) % PAGES_IN_HEAPFILE != 0);    
 }

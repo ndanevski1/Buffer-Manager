@@ -4,10 +4,12 @@ seq=(1105 2205 3305 4405 6605 8805 13206 17606 26407 35208 52810 70412 105616 14
 echo $seq
 make clean > /dev/null
 python3 mkcsv.py csv.csv 1000 > /dev/null
-make write_fixed_len_pages read_fixed_len_page > /dev/null
+make csv2heapfile "select" > /dev/null
 for s in ${seq[@]}; do
     echo Page size: $s
-    ./write_fixed_len_pages csv.csv page.page $s
-    ./read_fixed_len_page page.page $s > /dev/null
+    ./csv2heapfile csv.csv savehere.heap $s
+    ./select savehere.heap 5 NIK NIK $s > /dev/null
+    ./select savehere.heap 5 N V $s > /dev/null
+    ./select savehere.heap 5 A ZZZZZ $s > /dev/null
     echo
 done

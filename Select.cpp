@@ -6,8 +6,14 @@
 #include <cstring>
 #include <sstream>
 #include <iostream>
+#include <chrono>
+#include <iostream>
+
+using namespace std::chrono;
 
 void select(Heapfile h, int attribute_id, char* start, char* end, int page_size) {
+    auto start_time = high_resolution_clock::now();
+    
     HeapfileIterator heapfile_iterator(&h);
     while(heapfile_iterator.hasNext()) {
         Heapfile *h = heapfile_iterator.next();
@@ -24,6 +30,11 @@ void select(Heapfile h, int attribute_id, char* start, char* end, int page_size)
             }
         }
     }
+
+    auto end_time = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(end_time - start_time);
+
+    std::cerr << "READ TIME: " << duration.count() << " microseconds." << std::endl;
 }
 
 int main(int argc, char** argv){

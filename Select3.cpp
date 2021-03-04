@@ -9,6 +9,10 @@
 #include <cstring>
 #include <sstream>
 #include <iostream>
+#include <chrono>
+#include <iostream>
+
+using namespace std::chrono;
 
 int main(int argc, char** argv){
     if(argc != 7) {
@@ -27,5 +31,10 @@ int main(int argc, char** argv){
 
     assert(stat(colstore_directory, &st) != -1);
 
+    auto start_time = high_resolution_clock::now();
     select3(colstore_directory, attribute_id, return_attribute_id, start, end, page_size);
+    auto end_time = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(end_time - start_time);
+
+    std::cerr << "READ TIME: " << duration.count() << " microseconds." << std::endl;
 }

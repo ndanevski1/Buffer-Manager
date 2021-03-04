@@ -1,6 +1,7 @@
 *.page
 *.csv
 *.o
+*.col
 a.out
 read_fixed_len_page
 write_fixed_len_pages
