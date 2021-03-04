@@ -3,7 +3,7 @@ seq=(1105 2205 3305 4405 6605 8805 13206 17606 26407 35208 52810 70412 105616 14
 
 echo $seq
 make clean > /dev/null
-python3 mkcsv.py csv.csv 100 > /dev/null
+python3 mkcsv.py csv.csv 20000 > /dev/null
 make csv2colstore select2 select3 > /dev/null
 for s in ${seq[@]}; do
     echo Page size: $s
