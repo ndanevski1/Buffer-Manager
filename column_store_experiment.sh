@@ -9,11 +9,11 @@ for s in ${seq[@]}; do
     echo Page size: $s
     rm -r -f col.col
     ./csv2colstore csv.csv col.col $s
-    ./select2 col.col 5 NIK NIK $s > /dev/null
-    ./select3 col.col 5 10 NIK NIK $s > /dev/null
-    ./select2 col.col 5 N V $s > /dev/null
-    ./select3 col.col 5 10 N V $s > /dev/null
-    ./select2 col.col 5 A ZZZZZ $s > /dev/null
-    ./select3 col.col 5 10 A ZZZZZ $s > /dev/null
+    ./select2 col.col 5 NIK NIK $s > temp.o
+    ./select3 col.col 5 10 NIK NIK $s > temp.o
+    ./select2 col.col 5 N V $s > temp.o
+    ./select3 col.col 5 10 N V $s > temp.o
+    ./select2 col.col 5 A ZZZZZ $s > temp.o
+    ./select3 col.col 5 10 A ZZZZZ $s > temp.o
     echo
 done

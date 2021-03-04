@@ -8,6 +8,6 @@ make write_fixed_len_pages read_fixed_len_page > /dev/null
 for s in ${seq[@]}; do
     echo Page size: $s
     ./write_fixed_len_pages csv.csv page.page $s
-    ./read_fixed_len_page page.page $s > /dev/null
+    ./read_fixed_len_page page.page $s > temp.o
     echo
 done

@@ -8,8 +8,8 @@ make csv2heapfile "select" > /dev/null
 for s in ${seq[@]}; do
     echo Page size: $s
     ./csv2heapfile csv.csv savehere.heap $s
-    ./select savehere.heap 5 NIK NIK $s > /dev/null
-    ./select savehere.heap 5 N V $s > /dev/null
-    ./select savehere.heap 5 A ZZZZZ $s > /dev/null
+    ./select savehere.heap 5 NIK NIK $s > temp.o
+    ./select savehere.heap 5 N V $s > temp.o
+    ./select savehere.heap 5 A ZZZZZ $s > temp.o
     echo
 done
